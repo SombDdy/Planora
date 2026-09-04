@@ -1,30 +1,54 @@
-import { ListTodo, Clock3, CircleCheckBig } from "lucide-react";
+import { ListTodo, Clock3, CircleCheckBig, type LucideIcon } from "lucide-react";
+import type { Priority, Status, DashboardInfo } from "../utils/taskStyles";
 
-export const tasks = [
+
+type Task = {
+  id: number;
+  title: string;
+  priority: Priority;
+  status: Status;
+  dueDate: string;
+};
+
+type dashInfo = {
+    id: number;
+    icon: LucideIcon;
+    description: DashboardInfo;
+    quantity: number;
+}
+
+export const tasks: Task[] = [
     {
         id: 1,
-        title: 'Design dashboard layout',
-        priority: 'Medium',
-        status: 'Completed',
-        dueDate: 'Sep 5'
-    },
-    {
-        id: 2,
-        title: 'Create Settings page',
-        priority: 'High',
-        status: 'In Progress',
-        dueDate: 'Sep 8'
-    },
-    {
-        id: 3,
         title: 'Fix Header',
         priority: 'Low',
         status: 'To Do',
-        dueDate: 'Sep 12'
+        dueDate: '2026-09-12'
+    },
+    {
+        id: 2,
+        title: 'Design dashboard layout',
+        priority: 'Medium',
+        status: 'Completed',
+        dueDate: '2026-09-05'
+    },
+    {
+        id: 3,
+        title: 'Create Settings page',
+        priority: 'High',
+        status: 'In Progress',
+        dueDate: '2026-09-08'
+    },
+    {
+        id: 4,
+        title: 'SearchBar Fix',
+        priority: 'Medium',
+        status: 'To Do',
+        dueDate: '2026-09-16'
     },
 ]
 
-export const dashboardInfo = [
+export const dashboardInfo: dashInfo[] = [
     {
         id: 1,
         icon: ListTodo,

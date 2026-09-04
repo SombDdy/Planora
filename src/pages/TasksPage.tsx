@@ -1,9 +1,97 @@
-import { Plus } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { tasks } from "../data/dashboard";
 import { useState } from "react";
+import { getPriorityClasses, getStatusClasses } from "../utils/taskStyles";
+import type { Priority, Status } from "../utils/taskStyles";
 
 export function TasksPage() {
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [searchTask, setSearchTask] = useState("");
+  const [sortBy, setSortBy] = useState("Due Date");
+  const [openedModal, setOpenedModal] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskStatus, setTaskStatus] = useState<Status>("To Do");
+  const [taskPriority, setTaskPriority] = useState<Priority>("High");
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [taskList, setTaskList] = useState(tasks);
+  const [titleError, setTitleError] = useState("");
+  const [dateError, setDateError] = useState("");
+
+  const resetForm = () => {
+    setTaskTitle("");
+    setTaskStatus("To Do");
+    setTaskPriority("Medium");
+    setTaskDueDate("");
+    setTitleError("");
+    setDateError("");
+  };
+
+  const handleAddTask = () => {
+    if (!taskTitle || !taskDueDate) {
+      if (!taskTitle) {
+        setTitleError("Task title is required");
+      }
+      if (!taskDueDate) {
+        setDateError("Due Date is required");
+      }
+      if (!taskTitle || !taskDueDate){
+        return;
+      }
+      return;
+    }
+    const newTask = {
+      id: Date.now(),
+      title: taskTitle,
+      status: taskStatus,
+      priority: taskPriority,
+      dueDate: taskDueDate,
+    };
+    setTaskList([...taskList, newTask]);
+    resetForm();
+    setOpenedModal(false);
+  };
+
   const filters = ["All", "To Do", "In Progress", "Completed"];
+  const filteredTasks =
+    activeFilter === "All"
+      ? taskList
+      : taskList.filter((task) => task.status === activeFilter);
+  const searchedTasks = filteredTasks.filter((task) =>
+    task.title.toLowerCase().includes(searchTask.toLowerCase()),
+  );
+
+  const formatDate = (date: string) => {
+    const newDate = new Date(date);
+
+    return newDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const priorityOrder = {
+    High: 1,
+    Medium: 2,
+    Low: 3,
+  };
+
+  const statusOrder = {
+    "To Do": 1,
+    "In Progress": 2,
+    Completed: 3,
+  };
+
+  const sortedTasks = [...searchedTasks].sort((a, b) => {
+    if (sortBy === "Due Date") {
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    } else if (sortBy === "Priority") {
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    } else if (sortBy === "Status") {
+      return statusOrder[a.status] - statusOrder[b.status];
+    }
+    return 0;
+  });
+
   return (
     <div>
       <div className="flex items-center justify-between w-full mt-4">
@@ -13,7 +101,10 @@ export function TasksPage() {
             Manage and track all your tasks.
           </p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-xl bg-indigo-500 transition hover:bg-indigo-600 ">
+        <button
+          onClick={() => setOpenedModal(true)}
+          className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-xl bg-indigo-500 transition hover:bg-indigo-600 "
+        >
           <Plus size={18} /> Add Task
         </button>
       </div>
@@ -22,31 +113,169 @@ export function TasksPage() {
           <button
             key={filter}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-              filter === "All"
+              filter === activeFilter
                 ? "bg-indigo-500 text-white hover:bg-indigo-600"
                 : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
             }`}
+            onClick={() => setActiveFilter(filter)}
           >
             {filter}
           </button>
         ))}
+        <div className="relative w-full max-w-md">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTask}
+            onChange={(e) => setSearchTask(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-10 pr-4 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          />
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+          <p>Sort by:</p>
+          <select
+            value={sortBy}
+            onChange={(i) => setSortBy(i.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 outline-none text-sm"
+          >
+            <option>Due Date</option>
+            <option>Priority</option>
+            <option>Status</option>
+          </select>
+        </div>
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white mt-8">
         <div className="grid grid-cols-4 px-6 py-4 gap-12 border-b border-slate-200">
-            <p className="text-base font-medium text-slate-500">Task</p>
-            <p className="text-base font-medium text-slate-500">Priority</p>
-            <p className="text-base font-medium text-slate-500">Status</p>
-            <p className="text-base font-medium text-slate-500">Due Date</p>
-          </div>
-        {tasks.map((task) => (
-            <div key = {task.id} className="grid grid-cols-4 p-6 gap-12 border-b border-slate-200 last:border-b-0">
-                <p>{task.title}</p>
-                <p>{task.priority}</p>
-                <p>{task.status}</p>
-                <p>{task.dueDate}</p>
+          <p className="text-base font-medium text-slate-500">Task</p>
+          <p className="text-base font-medium text-slate-500">Status</p>
+          <p className="text-base font-medium text-slate-500">Priority</p>
+          <p className="text-base font-medium text-slate-500">Due Date</p>
+        </div>
+        {sortedTasks.map((task) => (
+          <div
+            key={task.id}
+            className="grid grid-cols-4 p-6 gap-12 border-b border-slate-200 last:border-b-0"
+          >
+            <p>{task.title}</p>
+            <p
+              className={`rounded-full px-3 py-1 text-sm font-medium w-fit ${getStatusClasses(task.status)}`}
+            >
+              {task.status}
+            </p>
+            <div className="flex items-center gap-2">
+              <span
+                className={`h-3 w-3 rounded-full ${getPriorityClasses(task.priority)}`}
+              />
+              <span className="text-base font-medium text-slate-700">
+                {task.priority}
+              </span>
             </div>
+            <p>{formatDate(task.dueDate)}</p>
+          </div>
         ))}
       </div>
+      {openedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">
+                  Add Task
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-500">Create a new task</p>
+              </div>
+
+              <button
+                onClick={() => setOpenedModal(false)}
+                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="mt-6">
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Task title
+              </label>
+              <input
+                type="text"
+                value={taskTitle}
+                onChange={(e) => {setTaskTitle(e.target.value); setTitleError("")}}
+                placeholder="Enter task title..."
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+              {titleError && (
+                <p className="mt-1.5 text-sm text-red-500">{titleError}</p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="flex flex-col">
+                <label className="mb-2 text-sm font-medium text-slate-700">
+                  Status
+                </label>
+                <select
+                  value={taskStatus}
+                  onChange={(e) => setTaskStatus(e.target.value as Status)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 outline-none text-sm"
+                >
+                  <option>To Do</option>
+                  <option>In Progress</option>
+                  <option>Completed</option>
+                </select>
+              </div>
+              <div className="flex flex-col">
+                <label className="mb-2 text-sm font-medium text-slate-700">
+                  Priority
+                </label>
+                <select
+                  value={taskPriority}
+                  onChange={(e) => setTaskPriority(e.target.value as Priority)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 outline-none text-sm"
+                >
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-col">
+              <label className="mb-2 text-sm font-medium text-slate-700">
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={taskDueDate}
+                onChange={(e) => {setTaskDueDate(e.target.value); setDateError("")}}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+              {dateError && (
+                <p className="mt-1.5 text-sm text-red-500">{dateError}</p>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  resetForm();
+                  setOpenedModal(false);
+                }}
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddTask}
+                className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-600"
+              >
+                Add Task
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

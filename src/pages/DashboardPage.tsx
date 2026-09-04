@@ -1,41 +1,7 @@
 import { tasks, dashboardInfo, projects } from "../data/dashboard";
+import { getPriorityClasses, getStatusClasses, getIconsColor } from "../utils/taskStyles"
 
 export function DashboardPage() {
-  const getIconsColor = (description: string) => {
-    if (description === "Total Tasks") {
-      return "bg-indigo-100";
-    } else if (description === "In Progress") {
-      return "bg-amber-100";
-    } else if (description === "Completed") {
-      return "bg-green-100";
-    } else {
-      return "bg-slate-100";
-    }
-  };
-
-  const getPriorityClasses = (priority: string) => {
-    if (priority === "High") {
-      return "bg-red-100 text-red-700";
-    } else if (priority === "Medium") {
-      return "bg-yellow-100 text-yellow-700";
-    } else if (priority === "Low") {
-      return "bg-green-100 text-green-700";
-    } else {
-      return "bg-slate-100 text-slate-600";
-    }
-  };
-
-  const getStatusClasses = (status: string) => {
-    if (status === "Completed") {
-      return "bg-green-100 text-green-700";
-    } else if (status === "In Progress") {
-      return "bg-indigo-100 text-indigo-700";
-    } else if (status === "To Do") {
-      return "bg-gray-100 text-gray-700";
-    } else {
-      return "bg-slate-100 text-slate-600";
-    }
-  };
 
   return (
     <div className="flex flex-col w-full mt-4">
@@ -74,8 +40,8 @@ export function DashboardPage() {
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="grid grid-cols-3 px-6 py-4 gap-12 border-b border-slate-200">
             <p className="text-base font-medium text-slate-500">Task</p>
-            <p className="text-base font-medium text-slate-500">Priority</p>
             <p className="text-base font-medium text-slate-500">Status</p>
+            <p className="text-base font-medium text-slate-500">Priority</p>      
           </div>
           {tasks.map((task) => (
             <div
@@ -84,15 +50,18 @@ export function DashboardPage() {
             >
               <p>{task.title}</p>
               <p
-                className={`rounded-full px-3 py-1 text-sm font-medium w-fit ${getPriorityClasses(task.priority)}`}
-              >
-                {task.priority}
-              </p>
-              <p
                 className={`rounded-full px-3 py-1 text-sm font-medium w-fit ${getStatusClasses(task.status)}`}
               >
                 {task.status}
               </p>
+              <div className="flex items-center gap-2">
+              <span
+                className={`h-3 w-3 rounded-full ${getPriorityClasses(task.priority)}`}
+              />
+              <span className="text-base font-medium text-slate-700">
+                {task.priority}
+              </span>
+            </div>
             </div>
           ))}
         </div>
