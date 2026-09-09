@@ -10,6 +10,7 @@ import {
 import { tasks } from "../data/dashboard";
 import { useState } from "react";
 import { getPriorityClasses, getStatusClasses } from "../utils/taskStyles";
+import { formatDate } from "../utils/dateUtils";
 import type { Priority, Status } from "../utils/taskStyles";
 
 export function TasksPage() {
@@ -67,9 +68,7 @@ export function TasksPage() {
 
   const handleEditTask = (id: number) => {
     const editedTask = taskList.find((task) => task.id === id);
-    if (!editedTask) {
-      return;
-    }
+    if (!editedTask) return;
     setEditingTaskId(editedTask.id);
     setTaskTitle(editedTask.title);
     setTaskStatus(editedTask.status);
@@ -117,15 +116,6 @@ export function TasksPage() {
   const searchedTasks = filteredTasks.filter((task) =>
     task.title.toLowerCase().includes(searchTask.toLowerCase()),
   );
-
-  const formatDate = (date: string) => {
-    const newDate = new Date(date);
-
-    return newDate.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   const priorityOrder = {
     High: 1,

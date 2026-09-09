@@ -1,9 +1,10 @@
-import { Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { Sidebar } from "../components/layout/Sidebar";
 import { DashboardPage } from "../pages/DashboardPage";
 import { TasksPage } from "../pages/TasksPage";
 import { ProjectsPage } from "../pages/ProjectsPage";
 import { Header } from "../components/layout/Header";
+import { ProjectDetailsPage } from "../pages/ProjectDetailsPage";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route
+              path="/projects/:projectId"
+              element={<ProjectDetailsPage />}
+            />
           </Routes>
         </main>
       </div>
