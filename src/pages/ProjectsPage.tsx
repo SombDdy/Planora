@@ -295,7 +295,7 @@ export function ProjectsPage() {
             Delete Project
           </h2>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500">  
             {`Are you sure you want to delete "${deletingProject?.name}"?`}
           </p>
 
