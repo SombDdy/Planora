@@ -4,6 +4,7 @@ import type { Priority, Status, DashboardInfo } from "../utils/taskStyles";
 
 type Task = {
   id: number;
+  projectId: number,
   title: string;
   priority: Priority;
   status: Status;
@@ -20,6 +21,7 @@ type dashInfo = {
 export const tasks: Task[] = [
     {
         id: 1,
+        projectId: 1,
         title: 'Fix Header',
         priority: 'Low',
         status: 'To Do',
@@ -27,6 +29,7 @@ export const tasks: Task[] = [
     },
     {
         id: 2,
+        projectId: 1,
         title: 'Design dashboard layout',
         priority: 'Medium',
         status: 'Completed',
@@ -34,6 +37,7 @@ export const tasks: Task[] = [
     },
     {
         id: 3,
+        projectId: 2,
         title: 'Create Settings page',
         priority: 'High',
         status: 'In Progress',
@@ -41,6 +45,7 @@ export const tasks: Task[] = [
     },
     {
         id: 4,
+        projectId: 3,
         title: 'SearchBar Fix',
         priority: 'Medium',
         status: 'To Do',

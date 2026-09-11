@@ -4,5 +4,6 @@ export const formatDate = (date: string) => {
     return newDate.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      year: "numeric",
     });
   };
