@@ -1,11 +1,19 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { projects, tasks } from "../data/dashboard";
-import { MoveLeft, Plus, Pencil, Trash2 } from "lucide-react";
+import { MoveLeft, Plus } from "lucide-react";
 import { formatDate } from "../utils/dateUtils";
-import { getPriorityClasses } from "../utils/taskStyles";
 import { useState } from "react";
 import { TaskModal } from "../components/tasks/TaskModal";
 import type { Priority, Status } from "../utils/taskStyles";
+import {
+  DndContext,
+  DragOverlay,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { KanbanTaskCard } from "../components/tasks/KanbanTaskCard";
+import { KanbanColumn } from "../components/tasks/KanbanColumn";
+import { TaskCardContent } from "../components/tasks/TaskCardContent";
 
 const kanbanColumns = [
   {
@@ -33,6 +41,7 @@ export function ProjectDetailsPage() {
   const [taskList, setTaskList] = useState(tasks);
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+  const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
 
   const navigate = useNavigate();
   const { projectId } = useParams();
@@ -144,6 +153,35 @@ export function ProjectDetailsPage() {
     setOpenedModal(false);
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    setActiveTaskId(null);
+
+    if (!over) return;
+
+    const currentTask = taskList.find((task) => task.id === active.id);
+
+    if (!currentTask) return;
+
+    if (currentTask.status === over.id) return;
+
+    setTaskList((prev) =>
+      prev.map((task) =>
+        task.id === active.id
+          ? {
+              ...task,
+              status: over.id as Status,
+            }
+          : task,
+      ),
+    );
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveTaskId(event.active.id as number);
+  };
+
   const projectTasks = taskList.filter((task) => task.projectId === project.id);
   const completedTasks = projectTasks.filter(
     (task) => task.status === "Completed",
@@ -152,7 +190,9 @@ export function ProjectDetailsPage() {
     projectTasks.length === 0
       ? 0
       : Math.round((completedTasks / projectTasks.length) * 100);
+
   const deletingTask = taskList.find((task) => task.id === deletingTaskId);
+  const activeTask = taskList.find((t) => t.id === activeTaskId);
 
   return (
     <div className="flex w-full flex-col">
@@ -205,81 +245,53 @@ export function ProjectDetailsPage() {
           <h2 className="text-xl font-semibold text-slate-900">Board</h2>
 
           <button
-            onClick={() => setOpenedModal(true)}
+            onClick={() => {
+              resetForm();
+              setEditingTaskId(null);
+              setOpenedModal(true);
+            }}
             className="flex items-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-600"
           >
             <Plus size={18} />
             Add Task
           </button>
         </div>
+        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="mt-5 grid grid-cols-3 gap-5">
+            {kanbanColumns.map((c) => {
+              const columnTasks = projectTasks.filter(
+                (task) => task.status === c.status,
+              );
 
-        <div className="mt-4 grid grid-cols-3 gap-6">
-          {kanbanColumns.map((c) => {
-            const columnTasks = projectTasks.filter(
-              (task) => task.status === c.status,
-            );
-
-            return (
-              <div
-                key={c.status}
-                className="min-h-[400px] rounded-xl bg-slate-100 p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-slate-700">
-                    {c.title}
-                  </h3>
-
-                  <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-2 text-xs font-medium text-slate-500">
-                    {columnTasks.length}
-                  </span>
-                </div>
-                <div className="mt-4 flex flex-col gap-3">
-                  {columnTasks.map((t) => {
-                    return (
-                      <div
-                        key={t.id}
-                        className="rounded-lg border border-slate-200 bg-white p-4"
-                      >
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium text-slate-900">
-                            {t.title}
-                          </p>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleEditTask(t.id)}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500"
-                            >
-                              <Pencil size={18} />
-                            </button>
-                            <button
-                              onClick={() => setDeletingTaskId(t.id)}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-4">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`h-3 w-3 rounded-full ${getPriorityClasses(t.priority)}`}
-                            ></span>
-                            <span className="text-sm font-medium text-slate-700">
-                              {t.priority}
-                            </span>
-                          </div>
-                          <p className="text-sm text-slate-500">
-                            Due {formatDate(t.dueDate)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              return (
+                <KanbanColumn
+                  key={c.status}
+                  status={c.status}
+                  title={c.title}
+                  count={columnTasks.length}
+                >
+                  {columnTasks.map((t) => (
+                    <KanbanTaskCard
+                      key={t.id}
+                      task={t}
+                      onEdit={handleEditTask}
+                      onDelete={setDeletingTaskId}
+                    />
+                  ))}
+                </KanbanColumn>
+              );
+            })}
+          </div>
+          <DragOverlay>
+            {activeTask !== undefined && (
+              <TaskCardContent
+                task={activeTask}
+                onEdit={handleEditTask}
+                onDelete={setDeletingTaskId}
+              />
+            )}
+          </DragOverlay>
+        </DndContext>
       </div>
       <TaskModal
         isOpen={openedModal}
@@ -303,6 +315,7 @@ export function ProjectDetailsPage() {
         titleError={titleError}
         dateError={dateError}
         onSubmit={editingTaskId ? handleUpdateTask : handleAddTask}
+        isEditing={editingTaskId !== null}
       />
       {deletingTaskId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

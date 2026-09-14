@@ -2,7 +2,7 @@ import { ListTodo, Clock3, CircleCheckBig, type LucideIcon } from "lucide-react"
 import type { Priority, Status, DashboardInfo } from "../utils/taskStyles";
 
 
-type Task = {
+export type Task = {
   id: number;
   projectId: number,
   title: string;
