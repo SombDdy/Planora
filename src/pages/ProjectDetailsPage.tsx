@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { projects, tasks } from "../data/dashboard";
+import { projects } from "../data/projects";
+import { tasks } from "../data/tasks";
 import { MoveLeft, Plus } from "lucide-react";
 import { formatDate } from "../utils/dateUtils";
 import { useState } from "react";
 import { TaskModal } from "../components/tasks/TaskModal";
-import type { Priority, Status } from "../utils/taskStyles";
+import type { Priority, Status } from "../types/task";
 import {
   DndContext,
   DragOverlay,

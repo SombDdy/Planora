@@ -1,12 +1,18 @@
 import { X } from "lucide-react";
-import type { Priority, Status } from "../../utils/taskStyles";
+import type { Priority, Status } from "../../types/task";
+import type { User } from "../../types/user";
 
 type TaskModalProps = {
   isOpen: boolean;
   onClose: () => void;
 
+  projectUsers: User[];
+
   taskTitle: string;
   setTaskTitle: (value: string) => void;
+
+  taskAssigneeId: number | null;
+  setTaskAssigneeId: (value: number | null) => void;
 
   taskStatus: Status;
   setTaskStatus: (value: Status) => void;
@@ -30,6 +36,8 @@ export function TaskModal({
   onClose,
   taskTitle,
   setTaskTitle,
+  taskAssigneeId,
+  setTaskAssigneeId,
   taskStatus,
   setTaskStatus,
   taskPriority,
@@ -40,6 +48,7 @@ export function TaskModal({
   dateError,
   onSubmit,
   isEditing = false,
+  projectUsers,
 }: TaskModalProps) {
   if (!isOpen) {
     return null;
@@ -83,6 +92,20 @@ export function TaskModal({
           {titleError && (
             <p className="mt-1.5 text-sm text-red-500">{titleError}</p>
           )}
+        </div>
+        <div className="mt-4">
+          <label className="mb-2 block text-sm font-medium text-slate-700">Assignee</label>
+
+          <select value={taskAssigneeId === null ? "" : taskAssigneeId} 
+          onChange={(e) => {
+            setTaskAssigneeId(e.target.value === "" ? null : Number(e.target.value))
+          }}
+          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-500">
+            <option value="">Unassigned</option>
+              {projectUsers.map((user) => (
+                  <option value={user.id} key={user.id}>{user.name}</option>
+              ))}
+          </select>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4">

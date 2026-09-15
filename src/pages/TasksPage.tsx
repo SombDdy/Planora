@@ -7,11 +7,13 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import { tasks } from "../data/dashboard";
+import { tasks } from "../data/tasks";
 import { useState } from "react";
 import { getPriorityClasses, getStatusClasses } from "../utils/taskStyles";
 import { formatDate } from "../utils/dateUtils";
-import type { Priority, Status } from "../utils/taskStyles";
+import { users } from "../data/users";
+import { projectMembers } from "../data/projectMembers";
+import type { Priority, Status } from "../types/task";
 import { TaskModal } from "../components/tasks/TaskModal";
 
 export function TasksPage() {
@@ -29,6 +31,7 @@ export function TasksPage() {
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [taskAssigneeId, setTaskAssigneeId] = useState<number | null>(null);
 
   const resetForm = () => {
     setTaskTitle("");
@@ -37,6 +40,7 @@ export function TasksPage() {
     setTaskDueDate("");
     setTitleError("");
     setDateError("");
+    setTaskAssigneeId(null);
   };
 
   const handleAddTask = () => {
@@ -54,6 +58,7 @@ export function TasksPage() {
       id: Date.now(),
       projectId: 1,
       title: taskTitle,
+      assigneeId: taskAssigneeId,
       status: taskStatus,
       priority: taskPriority,
       dueDate: taskDueDate,
@@ -73,6 +78,7 @@ export function TasksPage() {
     if (!editedTask) return;
     setEditingTaskId(editedTask.id);
     setTaskTitle(editedTask.title);
+    setTaskAssigneeId(editedTask.assigneeId);
     setTaskStatus(editedTask.status);
     setTaskPriority(editedTask.priority);
     setTaskDueDate(editedTask.dueDate);
@@ -85,6 +91,7 @@ export function TasksPage() {
         ? {
             ...task,
             title: taskTitle,
+            assigneeId: taskAssigneeId,
             status: taskStatus,
             priority: taskPriority,
             dueDate: taskDueDate,
@@ -144,6 +151,14 @@ export function TasksPage() {
   });
 
   const deletingTask = taskList.find((task) => task.id === deletingTaskId);
+
+  const currentProjectMembers = projectMembers.filter(
+    (member) => member.projectId === 1
+  );
+
+  const projectUsers = users.filter((user) =>
+  currentProjectMembers.some((member) => member.userId === user.id)
+  );
 
   return (
     <div>
@@ -230,15 +245,17 @@ export function TasksPage() {
         )}
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white mt-8">
-        <div className="grid grid-cols-[2fr_2fr_2fr_2fr_80px] items-center px-6 py-4 gap-12 border-b border-slate-200">
+        <div className="grid grid-cols-[2fr_1.5fr_1.5fr_1.5fr_1.5fr_80px] items-center px-6 py-4 gap-12 border-b border-slate-200">
           <p className="text-base font-medium text-slate-500">Task</p>
-          <p className="text-base font-medium text-slate-500">Status</p>
-          <p className="text-base font-medium text-slate-500">Priority</p>
+          <p className="text-base font-medium text-slate-500">Assignee</p>
           <p className="text-base font-medium text-slate-500">Due Date</p>
+          <p className="text-base font-medium text-slate-500">Priority</p>
+          <p className="text-base font-medium text-slate-500">Status</p>
           <p className="text-base font-medium text-slate-500">Actions</p>
         </div>
         {sortedTasks.length > 0 ? (
           sortedTasks.map((task) => {
+            const assignee = users.find((user) => user.id === task.assigneeId);
             const today = new Date();
 
             const todayString = `${today.getFullYear()}-${String(
@@ -252,13 +269,26 @@ export function TasksPage() {
             return (
               <div
                 key={task.id}
-                className="grid grid-cols-[2fr_2fr_2fr_2fr_80px] p-6 gap-12 border-b border-slate-200 last:border-b-0"
+                className="grid grid-cols-[2fr_1.5fr_1.5fr_1.5fr_1.5fr_80px] p-6 gap-12 border-b border-slate-200 last:border-b-0"
               >
                 <p>{task.title}</p>
+                {assignee ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
+                      {assignee.name[0]}
+                    </div>
+
+                    <span className="text-sm text-slate-600">
+                      {assignee.name}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-slate-400">Unassigned</span>
+                )}
                 <p
-                  className={`rounded-full px-3 py-1 text-sm font-medium w-fit ${getStatusClasses(task.status)}`}
+                  className={`${isOverdue === true ? "text-red-500" : isDueToday === true ? "text-amber-500" : "text-slate-600"}`}
                 >
-                  {task.status}
+                  {formatDate(task.dueDate)}
                 </p>
                 <div className="flex items-center gap-2">
                   <span
@@ -269,9 +299,9 @@ export function TasksPage() {
                   </span>
                 </div>
                 <p
-                  className={`${isOverdue === true ? "text-red-500" : isDueToday === true ? "text-amber-500" : "text-slate-600"}`}
+                  className={`rounded-full px-3 py-1 text-sm font-medium w-fit ${getStatusClasses(task.status)}`}
                 >
-                  {formatDate(task.dueDate)}
+                  {task.status}
                 </p>
                 <div className="flex items-center gap-1">
                   <button
@@ -307,6 +337,8 @@ export function TasksPage() {
         }}
         taskTitle={taskTitle}
         setTaskTitle={setTaskTitle}
+        taskAssigneeId={taskAssigneeId}
+        setTaskAssigneeId={setTaskAssigneeId}
         taskStatus={taskStatus}
         setTaskStatus={setTaskStatus}
         taskPriority={taskPriority}
@@ -317,6 +349,7 @@ export function TasksPage() {
         dateError={dateError}
         onSubmit={editingTaskId ? handleUpdateTask : handleAddTask}
         isEditing={editingTaskId !== null}
+        projectUsers={projectUsers}
       />
       {deletingTaskId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

@@ -1,4 +1,6 @@
-import { tasks, dashboardInfo, projects } from "../data/dashboard";
+import { dashboardInfo} from "../data/dashboard";
+import { projects } from "../data/projects";
+import { tasks } from "../data/tasks";
 import { getPriorityClasses, getStatusClasses, getIconsColor } from "../utils/taskStyles"
 
 export function DashboardPage() {

@@ -1,3 +1,5 @@
+import type { Priority, Status } from "../types/task";
+
 const priorityStyles = {
     High: 'bg-red-700',
     Medium: 'bg-yellow-700',
@@ -16,8 +18,7 @@ const iconsColor = {
     "Completed": 'bg-green-100',
 }
 
-export type Priority = "High" | "Medium" | "Low";
-export type Status = "Completed" | "In Progress" | "To Do";
+
 export type DashboardInfo = "Total Tasks" |  "In Progress" | "Completed"
 
 export const getPriorityClasses = (priority: Priority) => {

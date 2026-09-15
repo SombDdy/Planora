@@ -1,5 +1,5 @@
 import { Plus, X, Pencil, Trash2 } from "lucide-react";
-import { projects } from "../data/dashboard";
+import { projects } from "../data/projects";
 import { formatDate } from "../utils/dateUtils";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
