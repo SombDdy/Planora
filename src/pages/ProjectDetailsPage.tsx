@@ -5,7 +5,7 @@ import { MoveLeft, Plus } from "lucide-react";
 import { formatDate } from "../utils/dateUtils";
 import { useState } from "react";
 import { TaskModal } from "../components/tasks/TaskModal";
-import type { Priority, Status } from "../types/task";
+import type { Priority, Status, Task } from "../types/task";
 import {
   DndContext,
   DragOverlay,
@@ -15,6 +15,8 @@ import {
 import { KanbanTaskCard } from "../components/tasks/KanbanTaskCard";
 import { KanbanColumn } from "../components/tasks/KanbanColumn";
 import { TaskCardContent } from "../components/tasks/TaskCardContent";
+import { users } from "../data/users";
+import { projectMembers } from "../data/projectMembers";
 
 const kanbanColumns = [
   {
@@ -43,6 +45,7 @@ export function ProjectDetailsPage() {
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
   const [activeTaskId, setActiveTaskId] = useState<number | null>(null);
+  const [taskAssigneeId, setTaskAssigneeId] = useState<number | null>(null);
 
   const navigate = useNavigate();
   const { projectId } = useParams();
@@ -80,6 +83,7 @@ export function ProjectDetailsPage() {
     setTaskDueDate("");
     setTitleError("");
     setDateError("");
+    setTaskAssigneeId(null);
   };
 
   const handleAddTask = () => {
@@ -104,6 +108,7 @@ export function ProjectDetailsPage() {
         priority: taskPriority,
         dueDate: taskDueDate,
         projectId: project.id,
+        assigneeId: taskAssigneeId,
       };
 
       return [...prev, newTask];
@@ -116,6 +121,7 @@ export function ProjectDetailsPage() {
 
     setTitleError("");
     setDateError("");
+    setTaskAssigneeId(null);
 
     setOpenedModal(false);
   };
@@ -133,6 +139,7 @@ export function ProjectDetailsPage() {
     setTaskStatus(editedTask.status);
     setTaskPriority(editedTask.priority);
     setTaskDueDate(editedTask.dueDate);
+    setTaskAssigneeId(editedTask.assigneeId);
     setOpenedModal(true);
   };
 
@@ -145,6 +152,7 @@ export function ProjectDetailsPage() {
             status: taskStatus,
             priority: taskPriority,
             dueDate: taskDueDate,
+            assigneeId: taskAssigneeId,
           }
         : task,
     );
@@ -192,8 +200,32 @@ export function ProjectDetailsPage() {
       ? 0
       : Math.round((completedTasks / projectTasks.length) * 100);
 
+  const currentProjectMembers = projectMembers.filter(
+    (member) => member.projectId === project.id,
+  );
+
+  const projectUsers = users.filter((user) =>
+    currentProjectMembers.some((member) => member.userId === user.id),
+  );
+
+  const currentUser = users.find((user) => user.id === 1);
+  const currentMember = currentProjectMembers.find((member) => member.userId === currentUser?.id)
+
   const deletingTask = taskList.find((task) => task.id === deletingTaskId);
   const activeTask = taskList.find((t) => t.id === activeTaskId);
+
+  const canDeleteTask = currentMember?.role === "Owner" || currentMember?.role === "Admin";
+  const canEditTask = (task: Task) => {
+    if (currentMember?.role === "Owner" || currentMember?.role === "Admin"){
+      return true;
+    }
+    if (currentMember?.role === "User" && task.assigneeId === currentUser?.id){
+      return true;
+    }
+    return false;
+  }
+  
+  const canCreateTask = Boolean(currentMember);
 
   return (
     <div className="flex w-full flex-col">
@@ -240,12 +272,44 @@ export function ProjectDetailsPage() {
             />
           </div>
         </div>
+        <div>
+          <p className="text-sm text-slate-400">Members</p>
+
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex -space-x-1.5">
+              {projectUsers.slice(0, 3).map((user) => {
+                const projMem = currentProjectMembers.find(
+                  (member) => member.userId === user.id,
+                );
+                return (
+                  <span
+                    key={user.id}
+                    title={`${user.name} - ${projMem?.role}`}
+                    className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-50 bg-indigo-100 text-xs font-semibold text-indigo-600"
+                  >
+                    {user.name[0]}
+                  </span>
+                );
+              })}
+              {projectUsers.length > 3 && (
+                <span className="flex items-center justify-center h-6 w-6 rounded-full border-2 bg-slate-200 text-slate-600">
+                  +{projectUsers.length - 3}
+                </span>
+              )}
+            </div>
+
+            <span className="text-sm text-slate-700">
+              {projectUsers.length} members
+            </span>
+          </div>
+        </div>
       </div>
       <div className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-slate-900">Board</h2>
 
-          <button
+          {canCreateTask && (
+            <button
             onClick={() => {
               resetForm();
               setEditingTaskId(null);
@@ -256,6 +320,7 @@ export function ProjectDetailsPage() {
             <Plus size={18} />
             Add Task
           </button>
+          )}
         </div>
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="mt-5 grid grid-cols-3 gap-5">
@@ -277,6 +342,8 @@ export function ProjectDetailsPage() {
                       task={t}
                       onEdit={handleEditTask}
                       onDelete={setDeletingTaskId}
+                      canDelete={canDeleteTask}
+                      canEdit={canEditTask(t)}
                     />
                   ))}
                 </KanbanColumn>
@@ -289,6 +356,8 @@ export function ProjectDetailsPage() {
                 task={activeTask}
                 onEdit={handleEditTask}
                 onDelete={setDeletingTaskId}
+                canDelete={canDeleteTask}
+                canEdit={canEditTask(activeTask)}
               />
             )}
           </DragOverlay>
@@ -317,6 +386,9 @@ export function ProjectDetailsPage() {
         dateError={dateError}
         onSubmit={editingTaskId ? handleUpdateTask : handleAddTask}
         isEditing={editingTaskId !== null}
+        taskAssigneeId={taskAssigneeId}
+        setTaskAssigneeId={setTaskAssigneeId}
+        projectUsers={projectUsers}
       />
       {deletingTaskId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

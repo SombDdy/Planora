@@ -14,6 +14,8 @@ type TaskCardContentProps = {
   onDelete: (id: number) => void;
   listeners?: DraggableSyntheticListeners;
   attributes?: DraggableAttributes;
+  canDelete: boolean;
+  canEdit: boolean;
 };
 
 export function TaskCardContent({
@@ -22,6 +24,8 @@ export function TaskCardContent({
   onDelete,
   attributes,
   listeners,
+  canDelete,
+  canEdit,
 }: TaskCardContentProps) {
   const assignee = users.find((user) => user.id === task.assigneeId);
 
@@ -54,19 +58,23 @@ export function TaskCardContent({
           </span>
         )}
         <div className="flex items-center gap-1">
-          <button
+          {canEdit && (
+            <button
             onClick={() => onEdit(task.id)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500"
           >
             <Pencil size={18} />
           </button>
+          )}
 
-          <button
+          {canDelete &&(
+            <button
             onClick={() => onDelete(task.id)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
           >
             <Trash2 size={18} />
           </button>
+          )}
         </div>
       </div>
 
