@@ -13,8 +13,10 @@ import { getPriorityClasses, getStatusClasses } from "../utils/taskStyles";
 import { formatDate } from "../utils/dateUtils";
 import { users } from "../data/users";
 import { projectMembers } from "../data/projectMembers";
-import type { Priority, Status } from "../types/task";
+import type { Priority, Status, Task } from "../types/task";
 import { TaskModal } from "../components/tasks/TaskModal";
+import { Dropdown } from "../components/ui/Dropdown";
+import { priorityOptions, statusOptions } from "../data/taskOptions";
 
 export function TasksPage() {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -32,6 +34,12 @@ export function TasksPage() {
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [taskAssigneeId, setTaskAssigneeId] = useState<number | null>(null);
+
+  type InlineField = "assignee" | "dueDate" | "priority" | "status";
+  const [inlineEditing, setInlineEditing] = useState<{
+    taskId: number;
+    field: InlineField;
+  } | null>(null);
 
   const resetForm = () => {
     setTaskTitle("");
@@ -104,6 +112,25 @@ export function TasksPage() {
     setOpenedModal(false);
   };
 
+  const handleInlineUpdate = (
+    taskId: number,
+    field: "assigneeId" | "dueDate" | "priority" | "status",
+    value: number | string | null,
+  ) => {
+    setTaskList((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              [field]: value,
+            }
+          : task,
+      ),
+    );
+
+    setInlineEditing(null);
+  };
+
   const handleResetFilter = () => {
     setActiveFilter("All");
     setSortBy("Due Date");
@@ -153,12 +180,49 @@ export function TasksPage() {
   const deletingTask = taskList.find((task) => task.id === deletingTaskId);
 
   const currentProjectMembers = projectMembers.filter(
-    (member) => member.projectId === 1
+    (member) => member.projectId === 1,
   );
 
   const projectUsers = users.filter((user) =>
-  currentProjectMembers.some((member) => member.userId === user.id)
+    currentProjectMembers.some((member) => member.userId === user.id),
   );
+
+  const currentUser = users.find((user) => user.id === 1);
+  const currentMember = currentProjectMembers.find(
+    (member) => member.userId === currentUser?.id,
+  );
+
+  const canEditTask = (task: Task) => {
+    if (currentMember?.role === "Owner" || currentMember?.role === "Admin") {
+      return true;
+    }
+    if (currentMember?.role === "User" && task.assigneeId === currentUser?.id) {
+      return true;
+    }
+    return false;
+  };
+
+  const assigneeOptions = [
+    {
+      value: "",
+      label: "Unassigned",
+      icon: (
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-400">
+          —
+        </span>
+      ),
+    },
+
+    ...projectUsers.map((user) => ({
+      value: String(user.id),
+      label: user.name,
+      icon: (
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
+          {user.name[0].toUpperCase()}
+        </span>
+      ),
+    })),
+  ];
 
   return (
     <div>
@@ -244,7 +308,7 @@ export function TasksPage() {
           </button>
         )}
       </div>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white mt-8">
+      <div className="rounded-xl border border-slate-200 bg-white mt-8">
         <div className="grid grid-cols-[2fr_1.5fr_1.5fr_1.5fr_1.5fr_80px] items-center px-6 py-4 gap-12 border-b border-slate-200">
           <p className="text-base font-medium text-slate-500">Task</p>
           <p className="text-base font-medium text-slate-500">Assignee</p>
@@ -269,47 +333,168 @@ export function TasksPage() {
             return (
               <div
                 key={task.id}
-                className="grid grid-cols-[2fr_1.5fr_1.5fr_1.5fr_1.5fr_80px] p-6 gap-12 border-b border-slate-200 last:border-b-0"
+                className="grid grid-cols-[2fr_1.5fr_1.5fr_1.5fr_1.5fr_80px] items-center p-6 gap-12 border-b border-slate-200 last:border-b-0"
               >
                 <p>{task.title}</p>
-                {assignee ? (
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
-                      {assignee.name[0]}
-                    </div>
 
-                    <span className="text-sm text-slate-600">
-                      {assignee.name}
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-slate-400">Unassigned</span>
-                )}
-                <p
-                  className={`${isOverdue === true ? "text-red-500" : isDueToday === true ? "text-amber-500" : "text-slate-600"}`}
-                >
-                  {formatDate(task.dueDate)}
-                </p>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`h-3 w-3 rounded-full ${getPriorityClasses(task.priority)}`}
+                {inlineEditing?.taskId === task.id &&
+                inlineEditing.field === "assignee" ? (
+                  <Dropdown
+                    value={
+                      task.assigneeId === null ? "" : String(task.assigneeId)
+                    }
+                    options={assigneeOptions}
+                    onChange={() => {}}
+                    onClose={() => setInlineEditing(null)}
                   />
-                  <span className="text-base font-medium text-slate-700">
-                    {task.priority}
-                  </span>
-                </div>
-                <p
-                  className={`rounded-full px-3 py-1 text-sm font-medium w-fit ${getStatusClasses(task.status)}`}
-                >
-                  {task.status}
-                </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (canEditTask(task)) {
+                        setInlineEditing({
+                          taskId: task.id,
+                          field: "assignee",
+                        });
+                      }
+                    }}
+                    className="flex w-fit items-center gap-2 rounded-lg px-2 py-1 text-left transition hover:bg-slate-100"
+                  >
+                    {assignee ? (
+                      <>
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
+                          {assignee.name[0].toUpperCase()}
+                        </span>
+
+                        <span className="text-sm text-slate-600">
+                          {assignee.name}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-400">
+                          —
+                        </span>
+
+                        <span className="text-sm text-slate-400">
+                          Unassigned
+                        </span>
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {inlineEditing?.taskId === task.id &&
+                inlineEditing.field === "dueDate" ? (
+                  <input
+                    autoFocus
+                    type="date"
+                    value={task.dueDate}
+                    onChange={(e) =>
+                      handleInlineUpdate(task.id, "dueDate", e.target.value)
+                    }
+                    onBlur={() => setInlineEditing(null)}
+                    className="rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (canEditTask(task)) {
+                        setInlineEditing({
+                          taskId: task.id,
+                          field: "dueDate",
+                        });
+                      }
+                    }}
+                    className={`w-fit rounded-lg px-2 py-1 text-left transition hover:bg-slate-100 ${
+                      isOverdue
+                        ? "text-red-500"
+                        : isDueToday
+                          ? "text-amber-500"
+                          : "text-slate-600"
+                    }`}
+                  >
+                    {formatDate(task.dueDate)}
+                  </button>
+                )}
+
+                {inlineEditing?.taskId === task.id &&
+                inlineEditing.field === "priority" ? (
+                  <Dropdown
+                    value={task.priority}
+                    options={priorityOptions}
+                    onChange={(value) =>
+                      handleInlineUpdate(task.id, "priority", value as Priority)
+                    }
+                    onClose={() => setInlineEditing(null)}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (canEditTask(task)) {
+                        setInlineEditing({
+                          taskId: task.id,
+                          field: "priority",
+                        });
+                      }
+                    }}
+                    className="flex w-fit items-center gap-2 rounded-lg px-2 py-1 transition hover:bg-slate-100"
+                  >
+                    <span
+                      className={`h-3 w-3 rounded-full ${getPriorityClasses(
+                        task.priority,
+                      )}`}
+                    />
+
+                    <span className="text-base font-medium text-slate-700">
+                      {task.priority}
+                    </span>
+                  </button>
+                )}
+
+                {inlineEditing?.taskId === task.id &&
+                inlineEditing.field === "status" ? (
+                  <Dropdown
+                    value={task.status}
+                    options={statusOptions}
+                    onChange={(value) =>
+                      handleInlineUpdate(task.id, "status", value as Status)
+                    }
+                    onClose={() => setInlineEditing(null)}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (canEditTask(task)) {
+                        setInlineEditing({
+                          taskId: task.id,
+                          field: "status",
+                        });
+                      }
+                    }}
+                    className={`w-fit rounded-full px-3 py-1 text-sm font-medium transition ${getStatusClasses(
+                      task.status,
+                    )}`}
+                  >
+                    {task.status}
+                  </button>
+                )}
+
                 <div className="flex items-center gap-1">
                   <button
-                    onClick={() => handleEditTask(task.id)}
+                    onClick={() => {
+                      if (canEditTask(task)) {
+                        handleEditTask(task.id);
+                      }
+                    }}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500"
                   >
                     <Pencil size={18} />
                   </button>
+
                   <button
                     onClick={() => setDeletingTaskId(task.id)}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
