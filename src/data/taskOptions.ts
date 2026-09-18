@@ -9,7 +9,7 @@ export const priorityOptions: DropdownOption[] = [
   {
     value: "Medium",
     label: "Medium",
-    indicatorClass: "bg-amber-600",
+    indicatorClass: "bg-yellow-500",
   },
   {
     value: "Low",
@@ -27,7 +27,7 @@ export const statusOptions: DropdownOption[] = [
   {
     value: "In Progress",
     label: "In Progress",
-    indicatorClass: "bg-amber-500",
+    indicatorClass: "bg-yellow-500",
   },
   {
     value: "Completed",

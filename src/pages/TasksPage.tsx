@@ -17,6 +17,7 @@ import type { Priority, Status, Task } from "../types/task";
 import { TaskModal } from "../components/tasks/TaskModal";
 import { Dropdown } from "../components/ui/Dropdown";
 import { priorityOptions, statusOptions } from "../data/taskOptions";
+import { Button } from "../components/ui/Button";
 
 export function TasksPage() {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -202,6 +203,11 @@ export function TasksPage() {
     return false;
   };
 
+  const canDeleteTask =
+    currentMember?.role === "Owner" || currentMember?.role === "Admin";
+
+  const canCreateTask = Boolean(currentMember);
+
   const assigneeOptions = [
     {
       value: "",
@@ -233,15 +239,16 @@ export function TasksPage() {
             Manage and track all your tasks.
           </p>
         </div>
-        <button
-          onClick={() => {
-            setEditingTaskId(null);
-            setOpenedModal(true);
-          }}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white rounded-xl bg-indigo-500 transition hover:bg-indigo-600 "
-        >
-          <Plus size={18} /> Add Task
-        </button>
+        {canCreateTask && (
+          <Button
+            onClick={() => {
+              setEditingTaskId(null);
+              setOpenedModal(true);
+            }}>
+            <Plus size={18} />
+            Add Task
+          </Button>
+        )}
       </div>
       <div className="flex items-center gap-2 pt-5">
         {filters.map((filter) => (
@@ -338,13 +345,19 @@ export function TasksPage() {
                 <p>{task.title}</p>
 
                 {inlineEditing?.taskId === task.id &&
-                inlineEditing.field === "assignee" ? (
+                inlineEditing?.field === "assignee" ? (
                   <Dropdown
                     value={
                       task.assigneeId === null ? "" : String(task.assigneeId)
                     }
                     options={assigneeOptions}
-                    onChange={() => {}}
+                    onChange={(value) =>
+                      handleInlineUpdate(
+                        task.id,
+                        "assigneeId",
+                        value === "" ? null : Number(value),
+                      )
+                    }
                     onClose={() => setInlineEditing(null)}
                   />
                 ) : (
@@ -358,7 +371,11 @@ export function TasksPage() {
                         });
                       }
                     }}
-                    className="flex w-fit items-center gap-2 rounded-lg px-2 py-1 text-left transition hover:bg-slate-100"
+                    className={`flex w-fit items-center gap-2 rounded-lg px-2 py-1 text-left transition ${
+                      canEditTask(task)
+                        ? "cursor-pointer hover:bg-slate-100"
+                        : "cursor-default"
+                    }`}
                   >
                     {assignee ? (
                       <>
@@ -394,7 +411,11 @@ export function TasksPage() {
                       handleInlineUpdate(task.id, "dueDate", e.target.value)
                     }
                     onBlur={() => setInlineEditing(null)}
-                    className="rounded-lg border border-indigo-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-100"
+                    className={`w-fit rounded-lg px-2 py-1 text-left transition ${
+                      canEditTask(task)
+                        ? "cursor-pointer hover:bg-slate-100"
+                        : "cursor-default"
+                    }`}
                   />
                 ) : (
                   <button
@@ -407,12 +428,16 @@ export function TasksPage() {
                         });
                       }
                     }}
-                    className={`w-fit rounded-lg px-2 py-1 text-left transition hover:bg-slate-100 ${
+                    className={`w-fit rounded-lg px-2 py-1 text-left transition ${
                       isOverdue
                         ? "text-red-500"
                         : isDueToday
                           ? "text-amber-500"
                           : "text-slate-600"
+                    } ${
+                      canEditTask(task)
+                        ? "cursor-pointer hover:bg-slate-100"
+                        : "cursor-default"
                     }`}
                   >
                     {formatDate(task.dueDate)}
@@ -440,7 +465,11 @@ export function TasksPage() {
                         });
                       }
                     }}
-                    className="flex w-fit items-center gap-2 rounded-lg px-2 py-1 transition hover:bg-slate-100"
+                    className={`flex w-fit items-center gap-2 rounded-lg px-2 py-1 transition ${
+                      canEditTask(task)
+                        ? "cursor-pointer hover:bg-slate-100"
+                        : "cursor-default"
+                    }`}
                   >
                     <span
                       className={`h-3 w-3 rounded-full ${getPriorityClasses(
@@ -477,30 +506,32 @@ export function TasksPage() {
                     }}
                     className={`w-fit rounded-full px-3 py-1 text-sm font-medium transition ${getStatusClasses(
                       task.status,
-                    )}`}
+                    )} ${
+                      canEditTask(task) ? "cursor-pointer" : "cursor-default"
+                    }`}
                   >
                     {task.status}
                   </button>
                 )}
 
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => {
-                      if (canEditTask(task)) {
-                        handleEditTask(task.id);
-                      }
-                    }}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500"
-                  >
-                    <Pencil size={18} />
-                  </button>
+                  {canEditTask(task) && (
+                    <button
+                      onClick={() => handleEditTask(task.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                  )}
 
-                  <button
-                    onClick={() => setDeletingTaskId(task.id)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  {canDeleteTask && (
+                    <button
+                      onClick={() => setDeletingTaskId(task.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -546,21 +577,20 @@ export function TasksPage() {
               {`Are you sure you want to delete "${deletingTask?.title}" task?`}
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setDeletingTaskId(null)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
                 onClick={() => {
                   handleDeleteTask(deletingTaskId);
                   setDeletingTaskId(null);
-                }}
-                className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-600"
-              >
+                }}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

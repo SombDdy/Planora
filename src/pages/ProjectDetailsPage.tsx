@@ -17,6 +17,7 @@ import { KanbanColumn } from "../components/tasks/KanbanColumn";
 import { TaskCardContent } from "../components/tasks/TaskCardContent";
 import { users } from "../data/users";
 import { projectMembers } from "../data/projectMembers";
+import { Button } from "../components/ui/Button";
 
 const kanbanColumns = [
   {
@@ -113,16 +114,7 @@ export function ProjectDetailsPage() {
 
       return [...prev, newTask];
     });
-
-    setTaskTitle("");
-    setTaskStatus("To Do");
-    setTaskPriority("Medium");
-    setTaskDueDate("");
-
-    setTitleError("");
-    setDateError("");
-    setTaskAssigneeId(null);
-
+    resetForm();
     setOpenedModal(false);
   };
 
@@ -309,17 +301,15 @@ export function ProjectDetailsPage() {
           <h2 className="text-xl font-semibold text-slate-900">Board</h2>
 
           {canCreateTask && (
-            <button
+            <Button
             onClick={() => {
               resetForm();
               setEditingTaskId(null);
               setOpenedModal(true);
-            }}
-            className="flex items-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-600"
-          >
+            }}          >
             <Plus size={18} />
             Add Task
-          </button>
+          </Button>
           )}
         </div>
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -367,12 +357,7 @@ export function ProjectDetailsPage() {
         isOpen={openedModal}
         onClose={() => {
           setOpenedModal(false);
-          setTaskTitle("");
-          setTaskStatus("To Do");
-          setTaskPriority("Medium");
-          setTaskDueDate("");
-          setTitleError("");
-          setDateError("");
+          resetForm();
         }}
         taskTitle={taskTitle}
         setTaskTitle={setTaskTitle}
@@ -400,21 +385,19 @@ export function ProjectDetailsPage() {
               {`Are you sure you want to delete "${deletingTask?.title}" task?`}
             </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setDeletingTaskId(null)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
+              <Button
+                variant="secondary"
+                onClick={() => setDeletingTaskId(null)}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
                 onClick={() => {
                   handleDeleteTask(deletingTaskId);
                   setDeletingTaskId(null);
-                }}
-                className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-600"
-              >
+                }}>
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

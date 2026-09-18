@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import type { Priority, Status } from "../../types/task";
 import type { User } from "../../types/user";
+import { Button } from "../ui/Button";
 
 type TaskModalProps = {
   isOpen: boolean;
@@ -160,19 +161,16 @@ export function TaskModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
+          <Button
+            variant="secondary"
+            onClick={onClose}>
             Cancel
-          </button>
+          </Button>
 
-          <button
-            onClick={onSubmit}
-            className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-600"
-          >
+          <Button
+            onClick={onSubmit}>
             {isEditing ? "Edit Task" : "Add Task"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import type { Priority, Status } from "../types/task";
 
 const priorityStyles = {
-    High: 'bg-red-700',
-    Medium: 'bg-yellow-700',
-    Low: 'bg-green-700',
+    High: 'bg-red-500',
+    Medium: 'bg-yellow-500',
+    Low: 'bg-green-500',
 };
 
 const statusStyles = {
