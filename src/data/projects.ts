@@ -3,6 +3,7 @@ import type { Project } from "../types/project";
 export const projects: Project[] = [
     {
         id: 1,
+        workflowId: 1,
         name: "Planora Website",
         description: "Task management application",
         dueDate: "2026-09-20",
@@ -11,6 +12,7 @@ export const projects: Project[] = [
     },
     {
         id: 2,
+        workflowId: 1,
         name: "Net-City mobile App",
         description: "Door bell app",
         dueDate: "2026-09-26",
@@ -19,6 +21,7 @@ export const projects: Project[] = [
     },
     {
         id: 3,
+        workflowId: 1,
         name: "Online Shop",
         description: "Online shop for Apple products",
         dueDate: "2026-10-15",

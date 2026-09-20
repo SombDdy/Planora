@@ -5,4 +5,5 @@ export type Project = {
   dueDate: string;
   taskCount: number;
   progress: number;
+  workflowId: number;
 };

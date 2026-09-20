@@ -18,6 +18,7 @@ import { TaskCardContent } from "../components/tasks/TaskCardContent";
 import { users } from "../data/users";
 import { projectMembers } from "../data/projectMembers";
 import { Button } from "../components/ui/Button";
+import { workflows } from "../data/workflows";
 
 const kanbanColumns = [
   {
@@ -216,8 +217,9 @@ export function ProjectDetailsPage() {
     }
     return false;
   }
-  
   const canCreateTask = Boolean(currentMember);
+
+  
 
   return (
     <div className="flex w-full flex-col">
