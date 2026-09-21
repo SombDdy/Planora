@@ -5,7 +5,7 @@ import { MoveLeft, Plus } from "lucide-react";
 import { formatDate } from "../utils/dateUtils";
 import { useState } from "react";
 import { TaskModal } from "../components/tasks/TaskModal";
-import type { Priority, Status, Task } from "../types/task";
+import type { Priority, Task } from "../types/task";
 import {
   DndContext,
   DragOverlay,
@@ -20,25 +20,10 @@ import { projectMembers } from "../data/projectMembers";
 import { Button } from "../components/ui/Button";
 import { workflows } from "../data/workflows";
 
-const kanbanColumns = [
-  {
-    title: "To Do",
-    status: "To Do",
-  },
-  {
-    title: "In Progress",
-    status: "In Progress",
-  },
-  {
-    title: "Completed",
-    status: "Completed",
-  },
-];
-
 export function ProjectDetailsPage() {
   const [openedModal, setOpenedModal] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
-  const [taskStatus, setTaskStatus] = useState<Status>("To Do");
+  const [taskStatusId, setTaskStatusId] = useState<number>(1);
   const [taskPriority, setTaskPriority] = useState<Priority>("Medium");
   const [taskDueDate, setTaskDueDate] = useState("");
   const [titleError, setTitleError] = useState("");
@@ -78,9 +63,35 @@ export function ProjectDetailsPage() {
     );
   }
 
+  const currentWorkflow = workflows.find(
+    (workflow) => workflow.id === project.workflowId,
+  );
+
+  if (!currentWorkflow) {
+    return (
+      <div className="flex min-h-96 items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Workflow not found
+          </h2>
+
+          <p className="mt-2 text-sm text-slate-500">
+            This project does not have a valid workflow.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const sortedStatuses = [...currentWorkflow.statuses].sort(
+    (a, b) => a.position - b.position,
+  );
+
+  const firstStatus = sortedStatuses[0];
+  const completedStatus = sortedStatuses.at(-1);
+
   const resetForm = () => {
     setTaskTitle("");
-    setTaskStatus("To Do");
     setTaskPriority("Medium");
     setTaskDueDate("");
     setTitleError("");
@@ -101,12 +112,14 @@ export function ProjectDetailsPage() {
 
     setTaskList((prev) => {
       const newId =
-        prev.length === 0 ? 1 : Math.max(...prev.map((task) => task.id)) + 1;
+        prev.length === 0
+          ? 1
+          : Math.max(...prev.map((task) => task.id)) + 1;
 
-      const newTask = {
+      const newTask: Task = {
         id: newId,
         title: taskTitle,
-        status: taskStatus,
+        statusId: taskStatusId,
         priority: taskPriority,
         dueDate: taskDueDate,
         projectId: project.id,
@@ -115,6 +128,7 @@ export function ProjectDetailsPage() {
 
       return [...prev, newTask];
     });
+
     resetForm();
     setOpenedModal(false);
   };
@@ -126,10 +140,12 @@ export function ProjectDetailsPage() {
 
   const handleEditTask = (id: number) => {
     const editedTask = taskList.find((task) => task.id === id);
+
     if (!editedTask) return;
+
     setEditingTaskId(editedTask.id);
     setTaskTitle(editedTask.title);
-    setTaskStatus(editedTask.status);
+    setTaskStatusId(editedTask.statusId);
     setTaskPriority(editedTask.priority);
     setTaskDueDate(editedTask.dueDate);
     setTaskAssigneeId(editedTask.assigneeId);
@@ -137,19 +153,20 @@ export function ProjectDetailsPage() {
   };
 
   const handleUpdateTask = () => {
-    const updateTasks = taskList.map((task) =>
+    const updatedTasks = taskList.map((task) =>
       task.id === editingTaskId
         ? {
             ...task,
             title: taskTitle,
-            status: taskStatus,
+            statusId: taskStatusId,
             priority: taskPriority,
             dueDate: taskDueDate,
             assigneeId: taskAssigneeId,
           }
         : task,
     );
-    setTaskList(updateTasks);
+
+    setTaskList(updatedTasks);
     resetForm();
     setEditingTaskId(null);
     setOpenedModal(false);
@@ -162,18 +179,20 @@ export function ProjectDetailsPage() {
 
     if (!over) return;
 
+    const newStatusId = Number(over.id);
+
     const currentTask = taskList.find((task) => task.id === active.id);
 
     if (!currentTask) return;
 
-    if (currentTask.status === over.id) return;
+    if (currentTask.statusId === newStatusId) return;
 
     setTaskList((prev) =>
       prev.map((task) =>
         task.id === active.id
           ? {
               ...task,
-              status: over.id as Status,
+              statusId: newStatusId,
             }
           : task,
       ),
@@ -184,10 +203,14 @@ export function ProjectDetailsPage() {
     setActiveTaskId(event.active.id as number);
   };
 
-  const projectTasks = taskList.filter((task) => task.projectId === project.id);
+  const projectTasks = taskList.filter(
+    (task) => task.projectId === project.id,
+  );
+
   const completedTasks = projectTasks.filter(
-    (task) => task.status === "Completed",
+    (task) => task.statusId === completedStatus?.id,
   ).length;
+
   const progress =
     projectTasks.length === 0
       ? 0
@@ -202,24 +225,42 @@ export function ProjectDetailsPage() {
   );
 
   const currentUser = users.find((user) => user.id === 1);
-  const currentMember = currentProjectMembers.find((member) => member.userId === currentUser?.id)
 
-  const deletingTask = taskList.find((task) => task.id === deletingTaskId);
-  const activeTask = taskList.find((t) => t.id === activeTaskId);
+  const currentMember = currentProjectMembers.find(
+    (member) => member.userId === currentUser?.id,
+  );
 
-  const canDeleteTask = currentMember?.role === "Owner" || currentMember?.role === "Admin";
+  const deletingTask = taskList.find(
+    (task) => task.id === deletingTaskId,
+  );
+
+  const activeTask = taskList.find(
+    (task) => task.id === activeTaskId,
+  );
+
+  const canDeleteTask =
+    currentMember?.role === "Owner" ||
+    currentMember?.role === "Admin";
+
   const canEditTask = (task: Task) => {
-    if (currentMember?.role === "Owner" || currentMember?.role === "Admin"){
+    if (
+      currentMember?.role === "Owner" ||
+      currentMember?.role === "Admin"
+    ) {
       return true;
     }
-    if (currentMember?.role === "User" && task.assigneeId === currentUser?.id){
-      return true;
-    }
-    return false;
-  }
-  const canCreateTask = Boolean(currentMember);
 
-  
+    if (
+      currentMember?.role === "User" &&
+      task.assigneeId === currentUser?.id
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const canCreateTask = Boolean(currentMember);
 
   return (
     <div className="flex w-full flex-col">
@@ -232,14 +273,19 @@ export function ProjectDetailsPage() {
       </button>
 
       <div className="mt-8">
-        <h1 className="text-3xl font-bold text-slate-900">{project.name}</h1>
+        <h1 className="text-3xl font-bold text-slate-900">
+          {project.name}
+        </h1>
 
-        <p className="mt-2 text-base text-slate-500">{project.description}</p>
+        <p className="mt-2 text-base text-slate-500">
+          {project.description}
+        </p>
       </div>
 
       <div className="mt-8 flex items-center gap-12 border-b border-slate-200 pb-8">
         <div>
           <p className="text-sm text-slate-400">Due date</p>
+
           <p className="mt-1 font-medium text-slate-800">
             {formatDate(project.dueDate)}
           </p>
@@ -247,6 +293,7 @@ export function ProjectDetailsPage() {
 
         <div>
           <p className="text-sm text-slate-400">Tasks</p>
+
           <p className="mt-1 font-medium text-slate-800">
             {projectTasks.length} tasks
           </p>
@@ -256,7 +303,9 @@ export function ProjectDetailsPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-400">Progress</p>
 
-            <p className="text-sm font-medium text-slate-700">{progress}%</p>
+            <p className="text-sm font-medium text-slate-700">
+              {progress}%
+            </p>
           </div>
 
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
@@ -266,27 +315,30 @@ export function ProjectDetailsPage() {
             />
           </div>
         </div>
+
         <div>
           <p className="text-sm text-slate-400">Members</p>
 
           <div className="mt-2 flex items-center gap-2">
             <div className="flex -space-x-1.5">
               {projectUsers.slice(0, 3).map((user) => {
-                const projMem = currentProjectMembers.find(
+                const projectMember = currentProjectMembers.find(
                   (member) => member.userId === user.id,
                 );
+
                 return (
                   <span
                     key={user.id}
-                    title={`${user.name} - ${projMem?.role}`}
+                    title={`${user.name} - ${projectMember?.role}`}
                     className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-50 bg-indigo-100 text-xs font-semibold text-indigo-600"
                   >
                     {user.name[0]}
                   </span>
                 );
               })}
+
               {projectUsers.length > 3 && (
-                <span className="flex items-center justify-center h-6 w-6 rounded-full border-2 bg-slate-200 text-slate-600">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 bg-slate-200 text-slate-600">
                   +{projectUsers.length - 3}
                 </span>
               )}
@@ -298,50 +350,61 @@ export function ProjectDetailsPage() {
           </div>
         </div>
       </div>
+
       <div className="mt-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-slate-900">Board</h2>
+          <h2 className="text-xl font-semibold text-slate-900">
+            Board
+          </h2>
 
-          {canCreateTask && (
+          {canCreateTask && firstStatus && (
             <Button
-            onClick={() => {
-              resetForm();
-              setEditingTaskId(null);
-              setOpenedModal(true);
-            }}          >
-            <Plus size={18} />
-            Add Task
-          </Button>
+              onClick={() => {
+                resetForm();
+                setEditingTaskId(null);
+                setTaskStatusId(firstStatus.id);
+                setOpenedModal(true);
+              }}
+            >
+              <Plus size={18} />
+              Add Task
+            </Button>
           )}
         </div>
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="mt-5 grid grid-cols-3 gap-5">
-            {kanbanColumns.map((c) => {
+
+        <DndContext
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="mt-5 grid auto-cols-[minmax(280px,1fr)] grid-flow-col gap-5 overflow-x-auto pb-4">
+            {sortedStatuses.map((status) => {
               const columnTasks = projectTasks.filter(
-                (task) => task.status === c.status,
+                (task) => task.statusId === status.id,
               );
 
               return (
                 <KanbanColumn
-                  key={c.status}
-                  status={c.status}
-                  title={c.title}
+                  key={status.id}
+                  statusId={status.id}
+                  color={status.color}
+                  title={status.name}
                   count={columnTasks.length}
                 >
-                  {columnTasks.map((t) => (
+                  {columnTasks.map((task) => (
                     <KanbanTaskCard
-                      key={t.id}
-                      task={t}
+                      key={task.id}
+                      task={task}
                       onEdit={handleEditTask}
                       onDelete={setDeletingTaskId}
                       canDelete={canDeleteTask}
-                      canEdit={canEditTask(t)}
+                      canEdit={canEditTask(task)}
                     />
                   ))}
                 </KanbanColumn>
               );
             })}
           </div>
+
           <DragOverlay>
             {activeTask !== undefined && (
               <TaskCardContent
@@ -355,6 +418,7 @@ export function ProjectDetailsPage() {
           </DragOverlay>
         </DndContext>
       </div>
+
       <TaskModal
         isOpen={openedModal}
         onClose={() => {
@@ -363,8 +427,8 @@ export function ProjectDetailsPage() {
         }}
         taskTitle={taskTitle}
         setTaskTitle={setTaskTitle}
-        taskStatus={taskStatus}
-        setTaskStatus={setTaskStatus}
+        taskStatusId={taskStatusId}
+        setTaskStatusId={setTaskStatusId}
         taskPriority={taskPriority}
         setTaskPriority={setTaskPriority}
         taskDueDate={taskDueDate}
@@ -376,28 +440,35 @@ export function ProjectDetailsPage() {
         taskAssigneeId={taskAssigneeId}
         setTaskAssigneeId={setTaskAssigneeId}
         projectUsers={projectUsers}
+        workflowStatuses={sortedStatuses}
       />
+
       {deletingTaskId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
             <h2 className="text-xl font-semibold text-slate-900">
               Delete Task
             </h2>
+
             <p className="mt-2 text-sm text-slate-500">
               {`Are you sure you want to delete "${deletingTask?.title}" task?`}
             </p>
+
             <div className="mt-6 flex justify-end gap-3">
               <Button
                 variant="secondary"
-                onClick={() => setDeletingTaskId(null)}>
+                onClick={() => setDeletingTaskId(null)}
+              >
                 Cancel
               </Button>
+
               <Button
                 variant="danger"
                 onClick={() => {
                   handleDeleteTask(deletingTaskId);
                   setDeletingTaskId(null);
-                }}>
+                }}
+              >
                 Delete
               </Button>
             </div>
