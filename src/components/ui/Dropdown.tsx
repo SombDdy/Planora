@@ -1,6 +1,4 @@
-import {
-  ChevronDown,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import {
   useEffect,
@@ -30,6 +28,7 @@ export function Dropdown({
   onClose,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +57,28 @@ export function Dropdown({
     };
   }, [onClose]);
 
+  const handleToggle = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect =
+        dropdownRef.current.getBoundingClientRect();
+
+      const spaceBelow =
+        window.innerHeight - rect.bottom;
+
+      const spaceAbove = rect.top;
+
+      const estimatedMenuHeight =
+        options.length * 40 + 8;
+
+      setOpenUpward(
+        spaceBelow < estimatedMenuHeight &&
+          spaceAbove > spaceBelow,
+      );
+    }
+
+    setIsOpen((prev) => !prev);
+  };
+
   const handleSelect = (value: string) => {
     onChange(value);
     setIsOpen(false);
@@ -70,7 +91,7 @@ export function Dropdown({
     >
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggle}
         className="flex min-w-32 items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
       >
         <div className="flex items-center gap-2">
@@ -94,12 +115,20 @@ export function Dropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-50 mt-1 min-w-full overflow-hidden rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+        <div
+          className={`absolute left-0 z-50 min-w-full overflow-hidden rounded-lg border border-slate-200 bg-white p-1 shadow-lg ${
+            openUpward
+              ? "bottom-full mb-1"
+              : "top-full mt-1"
+          }`}
+        >
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
-              onClick={() => handleSelect(option.value)}
+              onClick={() =>
+                handleSelect(option.value)
+              }
               className="flex w-full items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
             >
               {option.icon}

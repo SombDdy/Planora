@@ -7,7 +7,7 @@ export const tasks: Task[] = [
         assigneeId: 1,
         title: 'Fix Header',
         priority: 'Low',
-        status: 'To Do',
+        statusId: 1,
         dueDate: '2026-09-12'
     },
     {
@@ -16,7 +16,7 @@ export const tasks: Task[] = [
         assigneeId: null,
         title: 'Design dashboard layout',
         priority: 'Medium',
-        status: 'Completed',
+        statusId: 1,
         dueDate: '2026-09-05'
     },
     {
@@ -25,7 +25,7 @@ export const tasks: Task[] = [
         assigneeId: 1,
         title: 'Create Settings page',
         priority: 'High',
-        status: 'In Progress',
+        statusId: 3,
         dueDate: '2026-09-08'
     },
     {
@@ -34,7 +34,7 @@ export const tasks: Task[] = [
         assigneeId: 1,
         title: 'SearchBar Fix',
         priority: 'Medium',
-        status: 'To Do',
+        statusId: 1,
         dueDate: '2026-09-16'
     },
 ]

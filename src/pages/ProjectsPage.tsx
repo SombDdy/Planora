@@ -38,6 +38,7 @@ export function ProjectsPage() {
 
     const newProject = {
       id: Date.now(),
+      workflowId: 1,
       name: projectName,
       description: projectDescription,
       taskCount: 0,
