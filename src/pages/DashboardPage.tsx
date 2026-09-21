@@ -7,9 +7,59 @@ import {
   getPriorityClasses,
   getStatusClasses,
   getIconsColor,
+  type DashboardInfo,
 } from "../utils/taskStyles";
 
+const getTaskWorkflowStatuses = (projectId: number) => {
+  const project = projects.find(
+    (project) => project.id === projectId,
+  );
+
+  const workflow = workflows.find(
+    (workflow) => workflow.id === project?.workflowId,
+  );
+
+  if (!workflow) {
+    return [];
+  }
+
+  return [...workflow.statuses].sort(
+    (a, b) => a.position - b.position,
+  );
+};
+
 export function DashboardPage() {
+  const totalTasks = tasks.length;
+
+  const completedTasks = tasks.filter((task) => {
+    const statuses = getTaskWorkflowStatuses(task.projectId);
+
+    const completedStatus = statuses.at(-1);
+
+    return task.statusId === completedStatus?.id;
+  }).length;
+
+  const inProgressTasks = tasks.filter((task) => {
+    const statuses = getTaskWorkflowStatuses(task.projectId);
+    if (statuses.length === 0){
+      return false;
+    }
+
+    const firstStatus = statuses[0];
+    const completedStatus = statuses.at(-1);
+
+    return (
+      task.statusId !== firstStatus?.id &&
+      task.statusId !== completedStatus?.id
+    );
+  }).length;
+
+  const dashboardStats: Record<DashboardInfo, number> = {
+    "Total Tasks": totalTasks,
+    "In Progress": inProgressTasks,
+    Completed: completedTasks,
+  };
+
   return (
     <div className="mt-4 flex w-full flex-col">
       <div className="flex flex-col gap-3">
@@ -48,7 +98,7 @@ export function DashboardPage() {
                 </p>
 
                 <p className="text-3xl font-semibold">
-                  {info.quantity}
+                  {dashboardStats[info.description]}
                 </p>
               </div>
             </div>
@@ -130,8 +180,15 @@ export function DashboardPage() {
         </h3>
 
         <div className="grid grid-cols-3 gap-4">
-          {projects.map((project) => (
-            <div
+          {projects.map((project) => {
+            const projectTasks = tasks.filter((task) => task.projectId === project.id);
+            const statuses = getTaskWorkflowStatuses(project.id)
+            const completedStatus = statuses.at(-1);
+            const completedProjectTasks = projectTasks.filter((task) => task.statusId === completedStatus?.id);
+            const progress = projectTasks.length === 0 ? 0 : Math.round(completedProjectTasks.length / projectTasks.length * 100)
+
+            return(
+              <div
               key={project.id}
               className="flex flex-col rounded-xl border border-slate-200 bg-white"
             >
@@ -141,21 +198,22 @@ export function DashboardPage() {
                 </p>
 
                 <div className="mb-2 flex items-center justify-between">
-                  <p>{project.taskCount} tasks</p>
-                  <p>{project.progress}%</p>
+                  <p>{projectTasks.length} tasks</p>
+                  <p>{progress}%</p>
                 </div>
 
                 <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
                   <div
                     className="h-full rounded-full bg-indigo-500"
                     style={{
-                      width: `${project.progress}%`,
+                      width: `${progress}%`,
                     }}
                   />
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

@@ -21,11 +21,11 @@ export const tasks: Task[] = [
     },
     {
         id: 3,
-        projectId: 2,
+        projectId: 1,
         assigneeId: 1,
         title: 'Create Settings page',
         priority: 'High',
-        statusId: 3,
+        statusId: 4,
         dueDate: '2026-09-08'
     },
     {
