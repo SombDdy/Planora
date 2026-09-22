@@ -1,24 +1,25 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { projects } from "../data/projects";
-import { tasks } from "../data/tasks";
+import { projects } from "../../data/projects";
+import { tasks } from "../../data/tasks";
 import { MoveLeft, Plus } from "lucide-react";
-import { formatDate } from "../utils/dateUtils";
+import { formatDate } from "../../utils/dateUtils";
 import { useState } from "react";
-import { TaskModal } from "../components/tasks/TaskModal";
-import type { Priority, Task } from "../types/task";
+import { TaskModal } from "../../components/tasks/TaskModal";
+import type { Priority, Task } from "../../types/task";
 import {
   DndContext,
   DragOverlay,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { KanbanTaskCard } from "../components/tasks/KanbanTaskCard";
-import { KanbanColumn } from "../components/tasks/KanbanColumn";
-import { TaskCardContent } from "../components/tasks/TaskCardContent";
-import { users } from "../data/users";
-import { projectMembers } from "../data/projectMembers";
-import { Button } from "../components/ui/Button";
-import { workflows } from "../data/workflows";
+import { KanbanTaskCard } from "../../components/tasks/KanbanTaskCard";
+import { KanbanColumn } from "../../components/tasks/KanbanColumn";
+import { TaskCardContent } from "../../components/tasks/TaskCardContent";
+import { users } from "../../data/users";
+import { projectMembers } from "../../data/projectMembers";
+import { Button } from "../../components/ui/Button";
+import { workflows } from "../../data/workflows";
+import { ProjectNavigation } from "../../components/projects/ProjectNavigation";
 
 export function ProjectDetailsPage() {
   const [openedModal, setOpenedModal] = useState(false);
@@ -272,7 +273,7 @@ export function ProjectDetailsPage() {
         Back to Projects
       </button>
 
-      <div className="mt-8">
+      <div className="mt-8 mb-6">
         <h1 className="text-3xl font-bold text-slate-900">
           {project.name}
         </h1>
@@ -281,6 +282,8 @@ export function ProjectDetailsPage() {
           {project.description}
         </p>
       </div>
+
+      <ProjectNavigation projectId={project.id} />
 
       <div className="mt-8 flex items-center gap-12 border-b border-slate-200 pb-8">
         <div>
