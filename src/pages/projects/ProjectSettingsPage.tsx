@@ -36,7 +36,6 @@ export function ProjectSettingsPage() {
       <ProjectNavigation projectId={project.id} />
 
       <div className="space-y-6">
-        {/* General */}
         <div className="rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-200 p-6">
             <h2 className="text-lg font-semibold text-slate-900">

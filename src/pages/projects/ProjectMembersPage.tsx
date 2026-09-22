@@ -4,7 +4,7 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { projectMembers } from "../../data/projectMembers";
 import { projects } from "../../data/projects";
@@ -43,12 +43,6 @@ export function ProjectMembersPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <Link
-        to={`/projects/${project.id}`}
-        className="mb-5 flex w-fit items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-900"
-      >
-        <ProjectNavigation projectId={project.id} />
-      </Link>
 
       <div className="mb-8 flex items-start justify-between gap-6">
         <div>
@@ -69,6 +63,8 @@ export function ProjectMembersPage() {
           Invite member
         </button>
       </div>
+        
+      <ProjectNavigation projectId={project.id} />
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="grid grid-cols-[1fr_180px_60px] border-b border-slate-200 bg-slate-50 px-5 py-3">
