@@ -1,14 +1,14 @@
-import { dashboardInfo } from "../data/dashboard";
-import { projects } from "../data/projects";
-import { tasks } from "../data/tasks";
-import { workflows } from "../data/workflows";
+import { dashboardInfo } from "../../data/dashboard";
+import { projects } from "../../data/projects";
+import { tasks } from "../../data/tasks";
+import { workflows } from "../../data/workflows";
 
 import {
   getPriorityClasses,
   getStatusClasses,
   getIconsColor,
   type DashboardInfo,
-} from "../utils/taskStyles";
+} from "../../utils/taskStyles";
 
 const getTaskWorkflowStatuses = (projectId: number) => {
   const project = projects.find(

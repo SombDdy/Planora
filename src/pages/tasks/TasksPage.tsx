@@ -9,21 +9,21 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { tasks } from "../data/tasks";
-import { users } from "../data/users";
-import { projects } from "../data/projects";
-import { workflows } from "../data/workflows";
-import { projectMembers } from "../data/projectMembers";
-import { priorityOptions } from "../data/taskOptions";
+import { tasks } from "../../data/tasks";
+import { users } from "../../data/users";
+import { projects } from "../../data/projects";
+import { workflows } from "../../data/workflows";
+import { projectMembers } from "../../data/projectMembers";
+import { priorityOptions } from "../../data/taskOptions";
 
-import { getPriorityClasses, getStatusClasses, getStatusIndicatorClasses } from "../utils/taskStyles";
-import { formatDate } from "../utils/dateUtils";
+import { getPriorityClasses, getStatusClasses, getStatusIndicatorClasses } from "../../utils/taskStyles";
+import { formatDate } from "../../utils/dateUtils";
 
-import type { Priority, Task } from "../types/task";
+import type { Priority, Task } from "../../types/task";
 
-import { TaskModal } from "../components/tasks/TaskModal";
-import { Dropdown } from "../components/ui/Dropdown";
-import { Button } from "../components/ui/Button";
+import { TaskModal } from "../../components/tasks/TaskModal";
+import { Dropdown } from "../../components/ui/Dropdown";
+import { Button } from "../../components/ui/Button";
 
 export function TasksPage() {
   const currentProject = projects.find((project) => project.id === 1);
