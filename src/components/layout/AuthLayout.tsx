@@ -7,12 +7,12 @@ export function AuthLayout() {
         <div className="mb-8 text-center">
           <div className="mb-6 flex justify-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500 font-bold text-white">
-              PL
+              LV
             </div>
           </div>
 
           <p className="text-lg font-semibold text-slate-900">
-            Planora
+            Lunvexa
           </p>
         </div>
 

@@ -40,14 +40,13 @@ export function Header() {
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
         </button>
 
-        {/* Profile */}
         <div className="relative">
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-200"
           >
-            PL
+            LV
           </button>
 
           {isProfileOpen && (
@@ -55,11 +54,11 @@ export function Header() {
               {/* User info */}
               <div className="border-b border-slate-200 px-4 py-3">
                 <p className="text-sm font-medium text-slate-900">
-                  Planora User
+                  Lunvexa User
                 </p>
 
                 <p className="mt-0.5 truncate text-xs text-slate-500">
-                  user@planora.com
+                  user@Lunvexa.com
                 </p>
               </div>
 

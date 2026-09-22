@@ -47,7 +47,7 @@ export function SettingsLayout() {
         </h1>
 
         <p className="mt-1 text-sm text-slate-500">
-          Manage your Planora preferences.
+          Manage your Lunvexa preferences.
         </p>
       </div>
 

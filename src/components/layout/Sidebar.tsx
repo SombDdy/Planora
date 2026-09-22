@@ -7,10 +7,10 @@ export function Sidebar(){
         <aside className="flex w-64 flex-col bg-slate-950 px-4 py-5 text-slate-300">
             <div className="mb-8 flex items-center gap-3 px-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500 text-white">
-                    PLR
+                    LV
                 </div>
                 <span className="text-lg font-semibold text-white">
-                    Planora
+                    Lunvexa
                 </span>
             </div>
 
