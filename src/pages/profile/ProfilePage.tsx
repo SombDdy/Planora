@@ -23,7 +23,7 @@ export function ProfilePage() {
         <div className="flex items-center gap-5 border-b border-slate-200 p-6">
           <div className="relative">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-2xl font-semibold text-indigo-600">
-              PL
+              LV
             </div>
 
             <button
@@ -80,7 +80,7 @@ export function ProfilePage() {
                 <input
                   id="full-name"
                   type="text"
-                  defaultValue="Planora User"
+                  defaultValue="Lunvexa User"
                   className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
               </div>
@@ -103,7 +103,7 @@ export function ProfilePage() {
                 <input
                   id="profile-email"
                   type="email"
-                  defaultValue="user@planora.com"
+                  defaultValue="user@Lunvexa.com"
                   className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 />
               </div>

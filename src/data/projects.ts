@@ -4,7 +4,7 @@ export const projects: Project[] = [
     {
         id: 1,
         workflowId: 1,
-        name: "Planora Website",
+        name: "Lunvexa Website",
         description: "Task management application",
         dueDate: "2026-09-20",
         taskCount: 6,

@@ -15,7 +15,7 @@ export function ResetPasswordPage() {
         </h1>
 
         <p className="mt-2 text-sm text-slate-500">
-          Choose a new password for your Planora account.
+          Choose a new password for your Lunvexa account.
         </p>
       </div>
 

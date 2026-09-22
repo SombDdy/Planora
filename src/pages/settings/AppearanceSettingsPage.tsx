@@ -9,7 +9,7 @@ export function AppearanceSettingsPage() {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Customize how Planora looks on your device.
+          Customize how Lunvexa looks on your device.
         </p>
       </div>
 

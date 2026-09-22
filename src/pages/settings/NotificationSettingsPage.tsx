@@ -37,7 +37,7 @@ export function NotificationSettingsPage() {
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Choose what you want Planora to notify you about.
+          Choose what you want Lunvexa to notify you about.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export function NotificationSettingsPage() {
 
         <NotificationRow
           title="Email notifications"
-          description="Send important Planora notifications to my email."
+          description="Send important Lunvexa notifications to my email."
           defaultChecked
         />
       </div>
