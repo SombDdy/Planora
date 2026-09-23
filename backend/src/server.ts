@@ -1,9 +1,12 @@
-import {createServer} from "node:http";
+import express from "express";
+import projectsRouter from "./modules/projects/projects.routes.js"
 
-const server = createServer((request, response) => {
-    response.end("Hello from Lunvexa API");
-});
+const app = express();
+app.use(express.json());
+const PORT = 3000;
 
-server.listen(3000, () => {
-    console.log("Lunvexa API is running on port 3000")
+app.use("/api/projects", projectsRouter)
+
+app.listen(PORT, () => {
+    console.log(`Lunvexa API is running on port ${PORT}`)
 })
