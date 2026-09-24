@@ -1,0 +1,38 @@
+export const tasks = [
+  {
+    id: 1,
+    projectId: 1,
+    assigneeId: 1,
+    title: "Fix Header",
+    priority: "Low",
+    statusId: 1,
+    dueDate: "2026-09-12",
+  },
+  {
+    id: 2,
+    projectId: 1,
+    assigneeId: null,
+    title: "Design dashboard layout",
+    priority: "Medium",
+    statusId: 1,
+    dueDate: "2026-09-05",
+  },
+  {
+    id: 3,
+    projectId: 1,
+    assigneeId: 1,
+    title: "Create Settings page",
+    priority: "High",
+    statusId: 4,
+    dueDate: "2026-09-08",
+  },
+  {
+    id: 4,
+    projectId: 3,
+    assigneeId: 1,
+    title: "SearchBar Fix",
+    priority: "Medium",
+    statusId: 1,
+    dueDate: "2026-09-16",
+  },
+];
