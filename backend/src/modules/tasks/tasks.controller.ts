@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { getAllTasks, getTaskById, createTask } from "./tasks.service.js";
+import { getAllTasks, getTaskById, createTask, updateTask } from "./tasks.service.js";
 
 export const getTasksController = (request: Request, response: Response) => {
   const tasks = getAllTasks();
@@ -39,7 +39,7 @@ export const postTaskController = (request: Request, response: Response) => {
   if (
     !data.priority ||
     typeof data.priority !== "string" ||
-    data.priority.trim().length === 0
+    data.priority.trim().length === 0 || !["Low", "Medium", "High"].includes(data.priority)
   ) {
     return response.status(400).json({ message: "Invalid priority" });
   }
@@ -56,3 +56,22 @@ export const postTaskController = (request: Request, response: Response) => {
   const newTask = createTask(data);
   return response.status(201).json(newTask);
 };
+
+export const patchTaskController = (request: Request, response: Response) => {
+  const id = Number(request.params.id);
+  if(!Number.isInteger(id) || id <= 0){
+    return response.status(400).json({message: "Invalid task id"})
+  }
+
+  const data = request.body;
+  if (data.projectId !== undefined && (typeof data.projectId !== "number" || data.projectId <=0 || !Number.isInteger(data.projectId))){
+    return response.status(400).json({message: "Invalid task id"});
+  }
+  if (data.assigneeId && (typeof data.assigneeId !== "number" || data.assigneeId <= 0 || !Number.isInteger(data.assigneeId))){
+    return response.status(400).json({message: "invalid assignee id"});
+  }
+  const updatedTask = updateTask(id, data);
+  return response.status(200).json({updatedTask})
+}
+
+
