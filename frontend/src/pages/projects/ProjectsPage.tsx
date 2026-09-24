@@ -159,7 +159,7 @@ export function ProjectsPage() {
                   </div>
                 </div>
 
-                <p className="mt-3 text-slate-500">{p.description}</p>
+                <p className="mt-3 text-slate-500 break-words">{p.description}</p>
 
                 <div className="mb-2 mt-6 flex items-center justify-between">
                   <p className="text-slate-500">{projectTasks.length} tasks</p>
@@ -230,9 +230,9 @@ export function ProjectsPage() {
                 Project name
               </label>
 
-              <input
-                type="text"
+              <textarea
                 maxLength={30}
+                rows={4}
                 value={projectName}
                 onChange={(e) => {
                   setProjectName(e.target.value);
