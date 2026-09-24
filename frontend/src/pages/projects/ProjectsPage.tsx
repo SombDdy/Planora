@@ -232,6 +232,7 @@ export function ProjectsPage() {
 
               <input
                 type="text"
+                maxLength={30}
                 value={projectName}
                 onChange={(e) => {
                   setProjectName(e.target.value);
@@ -255,11 +256,15 @@ export function ProjectsPage() {
 
               <input
                 type="text"
+                maxLength={500}
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
                 placeholder="Enter project description..."
                 className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
               />
+              <p className = "mt-1 text-right text-xs text-slate-400">
+                {projectDescription.length} / 500
+              </p>
             </div>
 
             <div className="mt-6">
