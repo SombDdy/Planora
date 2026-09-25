@@ -9,6 +9,7 @@ import { workflows } from "../../data/workflows";
 export function ProjectsPage() {
   const [openedModal, setOpenedModal] = useState(false);
   const [projectName, setProjectName] = useState("");
+  const [projectShortDescription, setProjectShortDescription] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectDueDate, setProjectDueDate] = useState("");
   const [projectList, setProjectList] = useState(projects);
@@ -21,6 +22,7 @@ export function ProjectsPage() {
 
   const resetForm = () => {
     setProjectName("");
+    setProjectShortDescription("");
     setProjectDescription("");
     setProjectDueDate("");
     setProjectNameError("");
@@ -42,6 +44,7 @@ export function ProjectsPage() {
       id: Date.now(),
       workflowId: 1,
       name: projectName,
+      shortDescription: projectShortDescription,
       description: projectDescription,
       taskCount: 0,
       progress: 0,
@@ -57,6 +60,7 @@ export function ProjectsPage() {
     if (!editedProjectList) return;
     setEditingProjectId(editedProjectList.id);
     setProjectName(editedProjectList.name);
+    setProjectShortDescription(editedProjectList.shortDescription);
     setProjectDescription(editedProjectList.description);
     setProjectDueDate(editedProjectList.dueDate);
     setOpenedModal(true);
@@ -68,6 +72,7 @@ export function ProjectsPage() {
         ? {
             ...proj,
             name: projectName,
+            shortDescription: projectShortDescription,
             description: projectDescription,
             dueDate: projectDueDate,
           }
@@ -159,7 +164,7 @@ export function ProjectsPage() {
                   </div>
                 </div>
 
-                <p className="mt-3 text-slate-500">{p.description}</p>
+                <p className="mt-3 text-slate-500 break-words">{p.shortDescription}</p>
 
                 <div className="mb-2 mt-6 flex items-center justify-between">
                   <p className="text-slate-500">{projectTasks.length} tasks</p>
@@ -231,7 +236,8 @@ export function ProjectsPage() {
               </label>
 
               <input
-                type="text"
+                type = "text"
+                maxLength={30}
                 value={projectName}
                 onChange={(e) => {
                   setProjectName(e.target.value);
@@ -250,16 +256,35 @@ export function ProjectsPage() {
 
             <div className="mt-6">
               <label className="mb-2 block text-sm font-medium text-slate-700">
+                Short description
+              </label>
+              <textarea
+                maxLength={50}
+                rows={1}
+                value={projectShortDescription}
+                onChange={(e) => setProjectShortDescription(e.target.value)}
+                placeholder="Enter project short description"
+                className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+             /> 
+                           
+            </div>
+            
+            <div className="mt-6">
+              <label className="mb-2 block text-sm font-medium text-slate-700">
                 Project Description
               </label>
 
-              <input
-                type="text"
+              <textarea
+                maxLength={500}
+                rows={5}
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
                 placeholder="Enter project description..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 "
               />
+              <p className = "mt-1 text-right text-xs text-slate-400">
+                {projectDescription.length} / 500
+              </p>
             </div>
 
             <div className="mt-6">
