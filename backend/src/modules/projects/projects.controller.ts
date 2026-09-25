@@ -34,7 +34,7 @@ export const postProjectController = (request: Request, response: Response) => {
     return response.status(400).json({ message: "Invalid description" });
   }
   if (!data.dueDate || typeof data.dueDate !=="string" || data.dueDate.trim().length === 0) {
-    return response.status(400).json({ message: "Invalid dueDate" });
+    return response.status(400).json({ message: "Invalid due date" });
   }
   if (typeof data.workflowId !== "number" || data.workflowId <= 0) {
     return response.status(400).json({ message: "Invalid workflowId" });
