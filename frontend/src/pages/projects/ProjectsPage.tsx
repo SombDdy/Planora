@@ -8,6 +8,7 @@ import { workflows } from "../../data/workflows";
 
 export function ProjectsPage() {
   const [openedModal, setOpenedModal] = useState(false);
+  const [projectSearch, setProjectSearch] = useState("")
   const [projectName, setProjectName] = useState("");
   const [projectShortDescription, setProjectShortDescription] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
@@ -95,6 +96,9 @@ export function ProjectsPage() {
 
   const navigate = useNavigate();
 
+  const searchProject = projectList.filter((project) => // тут всі проекти
+    project.name.toLowerCase().includes(projectSearch.toLowerCase().trim()) // тут список змінються, коли користувач використовує вікно пошуку
+    );
   return (
     <div className="flex w-full flex-col">
       <div className="mt-4 flex w-full items-center justify-between">
@@ -104,7 +108,15 @@ export function ProjectsPage() {
             Manage and organize your projects.
           </p>
         </div>
-
+        <div className="flex flex-1 justify-center mr-48">
+          <input
+          type = "text"
+          placeholder="Search project"
+          value={projectSearch}
+          onChange={(e) => setProjectSearch(e.target.value)}
+          className="w-full max-w-sm rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          />
+        </div>
         <button
           onClick={() => {
             resetForm();
@@ -119,11 +131,12 @@ export function ProjectsPage() {
       </div>
 
       <div className="grid grid-cols-3 gap-6 pt-12">
-        {projectList.length > 0 ? (
-          projectList.map((p) => {
+        {searchProject.length > 0 ? ( 
+          searchProject.map((p) => {
             const projectTasks = tasks.filter(
               (task) => task.projectId === p.id,
             );
+
 
             const workflow = workflows.find((workflow) => workflow.id === p.workflowId);
 
@@ -186,7 +199,13 @@ export function ProjectsPage() {
             );
           })
         ) : (
-          <div className="col-span-3 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-16">
+        <div className="col-span-3 flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-16">
+          {projectSearch.trim() !== "" ? (
+            <h2 className="text-lg font-semibold text-slate-900"> 
+              No projects found
+            </h2> 
+        ) : (
+          <>
             <h2 className="text-lg font-semibold text-slate-900">
               No projects yet
             </h2>
@@ -206,10 +225,11 @@ export function ProjectsPage() {
               <Plus size={18} />
               Add Project
             </button>
-          </div>
+          </>
         )}
       </div>
-
+      )}
+    </div>    
       {openedModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
