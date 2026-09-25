@@ -63,6 +63,16 @@ export const updateTask = (id: number, data: UpdateTaskData) => {
   return updatingTask;
 };
 
+export const deleteTask = (id: number) => {
+    const deletingTask = getTaskById(id);
+    if (!deletingTask){
+        return;
+    };
+    const taskIndex = tasks.findIndex((task) => task.id === id);
+    const deletedTask = tasks.splice(taskIndex, 1);
+    return deletedTask[0];
+}
+
 export const getAllTasks = () => {
   return tasks;
 };
